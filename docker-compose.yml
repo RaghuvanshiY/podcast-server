@@ -7,7 +7,7 @@ services:
       - "8000:8000"
     volumes:
       - ./data:/app/data
-      - ./config/feeds.json:/app/config/feeds.json:ro
+      - ./config:/app/config:ro
       - ./assets:/app/assets:ro
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
