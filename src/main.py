@@ -16,11 +16,15 @@ from transcriber import Transcriber
 from ad_detector import AdDetector
 from audio_processor import AudioProcessor
 
-# Configure logging
+# Configure logging to both file and console
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler('/app/data/server.log'),
+        logging.StreamHandler()  # Keep console output for Docker logs
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -113,19 +117,23 @@ def background_rss_refresh():
         # Wait 15 minutes
         time.sleep(900)
 
-def process_episode(slug: str, episode_id: str, episode_url: str):
+def process_episode(slug: str, episode_id: str, episode_url: str, episode_title: str = "Unknown"):
     """Process a single episode (transcribe, detect ads, remove ads)."""
+    start_time = time.time()
+
     try:
+        # Log start with title
+        logger.info(f"[{slug}:{episode_id}] Starting: \"{episode_title}\"")
+
         # Update status to processing
         data = storage.load_data_json(slug)
         data['episodes'][episode_id] = {
             'status': 'processing',
             'original_url': episode_url,
+            'title': episode_title,
             'processed_at': datetime.utcnow().isoformat() + 'Z'
         }
         storage.save_data_json(slug, data)
-
-        logger.info(f"[{slug}:{episode_id}] Starting processing for episode")
 
         # Step 1: Check if transcript exists
         transcript_path = storage.get_episode_path(slug, episode_id, "-transcript.txt")
@@ -220,6 +228,7 @@ def process_episode(slug: str, episode_id: str, episode_url: str):
             data['episodes'][episode_id] = {
                 'status': 'processed',
                 'original_url': episode_url,
+                'title': episode_title,
                 'processed_file': f"episodes/{episode_id}.mp3",
                 'processed_at': datetime.utcnow().isoformat() + 'Z',
                 'original_duration': original_duration,
@@ -228,10 +237,15 @@ def process_episode(slug: str, episode_id: str, episode_url: str):
             }
             storage.save_data_json(slug, data)
 
+            # Calculate processing time
+            processing_time = time.time() - start_time
+
+            # Final summary log
             if original_duration and new_duration:
-                logger.info(f"[{slug}:{episode_id}] Processing complete: {original_duration/60:.1f}min → {new_duration/60:.1f}min")
+                time_saved = original_duration - new_duration
+                logger.info(f"[{slug}:{episode_id}] Complete: \"{episode_title}\" | {original_duration/60:.1f}→{new_duration/60:.1f}min | {len(ads)} ads removed | {processing_time:.1f}s")
             else:
-                logger.info(f"[{slug}:{episode_id}] Processing complete, saved to episodes/{episode_id}.mp3")
+                logger.info(f"[{slug}:{episode_id}] Complete: \"{episode_title}\" | {len(ads)} ads removed | {processing_time:.1f}s")
 
             return True
 
@@ -241,13 +255,15 @@ def process_episode(slug: str, episode_id: str, episode_url: str):
                 os.unlink(audio_path)
 
     except Exception as e:
-        logger.error(f"[{slug}:{episode_id}] Processing failed: {e}")
+        processing_time = time.time() - start_time
+        logger.error(f"[{slug}:{episode_id}] Failed: \"{episode_title}\" | Error: {e} | {processing_time:.1f}s")
 
         # Update status to failed
         data = storage.load_data_json(slug)
         data['episodes'][episode_id] = {
             'status': 'failed',
             'original_url': episode_url,
+            'title': episode_title,
             'error': str(e),
             'failed_at': datetime.utcnow().isoformat() + 'Z'
         }
@@ -361,9 +377,11 @@ def serve_episode(slug, episode_id):
 
     episodes = rss_parser.extract_episodes(original_feed)
     original_url = None
+    episode_title = "Unknown"
     for ep in episodes:
         if ep['id'] == episode_id:
             original_url = ep['url']
+            episode_title = ep.get('title', 'Unknown')
             break
 
     if not original_url:
@@ -373,7 +391,7 @@ def serve_episode(slug, episode_id):
     logger.info(f"[{slug}:{episode_id}] Starting new processing")
 
     # Process episode (blocking)
-    if process_episode(slug, episode_id, original_url):
+    if process_episode(slug, episode_id, original_url, episode_title):
         # Serve the newly processed file
         file_path = storage.get_episode_path(slug, episode_id)
         if file_path.exists():
