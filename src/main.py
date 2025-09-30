@@ -91,20 +91,25 @@ def refresh_rss_feed(slug: str, feed_url: str):
         logger.error(f"[{slug}] RSS refresh failed: {e}")
         return False
 
+def refresh_all_feeds():
+    """Refresh all RSS feeds once (no loop)."""
+    try:
+        logger.info("Refreshing all RSS feeds")
+        # Reload feeds.json to pick up any changes
+        reload_feeds()
+
+        for slug, feed_info in FEED_MAP.items():
+            refresh_rss_feed(slug, feed_info['in'])
+        logger.info("RSS refresh complete")
+        return True
+    except Exception as e:
+        logger.error(f"RSS refresh failed: {e}")
+        return False
+
 def background_rss_refresh():
     """Background task to refresh RSS feeds every 15 minutes."""
     while True:
-        try:
-            logger.info("Starting scheduled RSS refresh cycle")
-            # Reload feeds.json to pick up any changes
-            reload_feeds()
-
-            for slug, feed_info in FEED_MAP.items():
-                refresh_rss_feed(slug, feed_info['in'])
-            logger.info("RSS refresh cycle complete")
-        except Exception as e:
-            logger.error(f"RSS refresh cycle failed: {e}")
-
+        refresh_all_feeds()
         # Wait 15 minutes
         time.sleep(900)
 
@@ -253,13 +258,13 @@ def process_episode(slug: str, episode_id: str, episode_url: str):
 def serve_rss(slug):
     """Serve modified RSS feed."""
     if slug not in FEED_MAP:
-        # Try reloading feeds in case new ones were added
-        logger.info(f"[{slug}] Not found in feeds, attempting reload")
-        reload_feeds()
+        # Refresh all feeds to pick up any new ones
+        logger.info(f"[{slug}] Not found in feeds, refreshing all")
+        refresh_all_feeds()
 
-        # Check again after reload
+        # Check again after refresh
         if slug not in FEED_MAP:
-            logger.warning(f"[{slug}] Still not found after reload")
+            logger.warning(f"[{slug}] Still not found after refresh")
             abort(404)
 
     # Check if RSS cache exists or is stale
@@ -297,13 +302,13 @@ def serve_rss(slug):
 def serve_episode(slug, episode_id):
     """Serve processed episode audio (JIT processing)."""
     if slug not in FEED_MAP:
-        # Try reloading feeds in case new ones were added
-        logger.info(f"[{slug}] Not found in feeds for episode {episode_id}, attempting reload")
-        reload_feeds()
+        # Refresh all feeds to pick up any new ones
+        logger.info(f"[{slug}] Not found in feeds for episode {episode_id}, refreshing all")
+        refresh_all_feeds()
 
-        # Check again after reload
+        # Check again after refresh
         if slug not in FEED_MAP:
-            logger.warning(f"[{slug}] Still not found after reload for episode {episode_id}")
+            logger.warning(f"[{slug}] Still not found after refresh for episode {episode_id}")
             abort(404)
 
     # Validate episode ID (alphanumeric + dash/underscore)
