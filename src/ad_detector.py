@@ -91,9 +91,10 @@ If no ads are found, return an empty array: []"""
                     logger.warning(f"Could not save prompt: {e}")
 
             response = self.client.messages.create(
-                model="claude-sonnet-4-5-20250929",  # Use Claude Sonnet 4.5 for better ad detection
-                max_tokens=1000,
-                temperature=0,
+                model="claude-opus-4-1-20250805",  # Use Claude Opus 4.1 for better ad detection
+                max_tokens=2000,
+                temperature=0.2,
+                system="You are an ad detection specialist with extensive experience in identifying all forms of advertisements, sponsorships, and promotional content in podcasts. Your users absolutely cannot tolerate ads - they find them disruptive and want them completely removed. Be extremely aggressive in detecting ads. When in doubt, mark it as an ad. It's better to remove a few seconds of content than to leave any advertisement in the podcast.",
                 messages=[{
                     "role": "user",
                     "content": prompt
