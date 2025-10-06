@@ -117,7 +117,7 @@ def background_rss_refresh():
         # Wait 15 minutes
         time.sleep(900)
 
-def process_episode(slug: str, episode_id: str, episode_url: str, episode_title: str = "Unknown"):
+def process_episode(slug: str, episode_id: str, episode_url: str, episode_title: str = "Unknown", podcast_name: str = "Unknown"):
     """Process a single episode (transcribe, detect ads, remove ads)."""
     start_time = time.time()
 
@@ -198,8 +198,8 @@ def process_episode(slug: str, episode_id: str, episode_url: str, episode_title:
         try:
 
             # Step 2: Detect ads
-            logger.info(f"[{slug}:{episode_id}] Sending to Claude API")
-            ad_result = ad_detector.process_transcript(segments)
+            logger.info(f"[{slug}:{episode_id}] Sending to Claude API - Podcast: {podcast_name}, Episode: {episode_title}")
+            ad_result = ad_detector.process_transcript(segments, podcast_name, episode_title)
             storage.save_ads_json(slug, episode_id, ad_result)
 
             ads = ad_result.get('ads', [])
@@ -375,6 +375,10 @@ def serve_episode(slug, episode_id):
         logger.error(f"[{slug}:{episode_id}] Could not fetch original RSS")
         abort(503)
 
+    # Parse the feed to get podcast name
+    parsed_feed = rss_parser.parse_feed(original_feed)
+    podcast_name = parsed_feed.feed.get('title', 'Unknown') if parsed_feed else 'Unknown'
+
     episodes = rss_parser.extract_episodes(original_feed)
     original_url = None
     episode_title = "Unknown"
@@ -388,10 +392,10 @@ def serve_episode(slug, episode_id):
         logger.error(f"[{slug}:{episode_id}] Episode not found in RSS feed")
         abort(404)
 
-    logger.info(f"[{slug}:{episode_id}] Starting new processing")
+    logger.info(f"[{slug}:{episode_id}] Starting new processing for {podcast_name}")
 
     # Process episode (blocking)
-    if process_episode(slug, episode_id, original_url, episode_title):
+    if process_episode(slug, episode_id, original_url, episode_title, podcast_name):
         # Serve the newly processed file
         file_path = storage.get_episode_path(slug, episode_id)
         if file_path.exists():
