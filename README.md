@@ -1,75 +1,76 @@
 # Podcast Ad Removal Server
 
-Automatically removes advertisements from podcast episodes using AI-powered detection and audio processing.
+Removes ads from podcasts using Whisper transcription. Serves modified RSS feeds that work with any podcast app.
 
-## Features
+> **Disclaimer:** This tool is for personal use only. Only use it with podcasts you have permission to modify or where such modification is permitted under applicable laws. Respect content creators and their terms of service.
 
-- Fetches and caches RSS feeds
-- Just-In-Time (JIT) audio processing
-- Transcribes episodes using Faster Whisper
-- Detects ads using Claude API
-- Removes ads and replaces with 1-second beep
-- Serves modified RSS feeds and processed audio files
+## How It Works
+
+1. **Transcription** - Whisper converts audio to text with timestamps
+2. **Ad Detection** - Claude API analyzes transcript to identify ad segments
+3. **Audio Processing** - FFmpeg removes detected ads and inserts short audio markers
+4. **Serving** - Flask serves modified RSS feeds and processed audio files
+
+Processing happens on-demand when you play an episode. First play takes a few minutes, subsequent plays are instant (cached).
+
+## Requirements
+
+- Docker with NVIDIA GPU support (for Whisper)
+- Anthropic API key
 
 ## Setup
 
-1. **Add your beep audio file:**
-   - Place a 1-second beep/tone audio file named `replace.mp3` in the `assets/` directory
+```bash
+# 1. Create environment file
+echo "ANTHROPIC_API_KEY=your-key-here" > .env
 
-2. **Configure your API key:**
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your ANTHROPIC_API_KEY
-   ```
+# 2. Configure feeds
+cp config/feeds-example.json config/feeds.json
+# Edit config/feeds.json with your podcast RSS URLs
 
-3. **Configure podcast feeds:**
-   - Edit `config/feeds.json` to add your podcast RSS feeds
-   - Example configuration is already included for universe1
+# 3. Run
+docker-compose up --build
+```
 
-4. **Build and run with Docker:**
-   ```bash
-   docker-compose up --build
-   ```
+## Configuration
+
+Edit `config/feeds.json`:
+```json
+[
+  {
+    "in": "https://example.com/podcast/feed.rss",
+    "out": "/mypodcast"
+  }
+]
+```
+
+- `in` - Original podcast RSS feed URL
+- `out` - URL path for your modified feed (e.g., `/mypodcast` → `http://localhost:8000/mypodcast`)
+
+## Finding Podcast RSS Feeds
+
+Most podcasts publish RSS feeds. Common ways to find them:
+
+1. **Podcast website** - Look for "RSS" link in footer or subscription options
+2. **Apple Podcasts** - Search on [podcastindex.org](https://podcastindex.org) using the Apple Podcasts URL
+3. **Spotify-exclusive** - Not available (Spotify doesn't expose RSS feeds)
+4. **Hosting platforms** - Common patterns:
+   - Libsyn: `https://showname.libsyn.com/rss`
+   - Spreaker: `https://www.spreaker.com/show/{id}/episodes/feed`
+   - Omny: Check page source for `omnycontent.com` URLs
 
 ## Usage
 
-Once running, your modified podcast RSS feeds will be available at:
-- `http://localhost:8000/universe1` (or whatever slug you configured)
-
-Add this URL to your podcast app. When you play an episode:
-1. First request triggers processing (may take a few minutes)
-2. Subsequent requests serve cached processed files
-3. Failed processing falls back to original audio
-
-## Directory Structure
-
+Add your modified feed URL to any podcast app:
 ```
-data/                    # Auto-created, stores all processed data
-├── universe1/          # One directory per podcast
-│   ├── data.json       # Episode tracking metadata
-│   ├── modified-rss.xml # Cached modified RSS feed
-│   └── episodes/       # Processed episodes
-│       ├── {id}.mp3
-│       ├── {id}-transcript.txt
-│       └── {id}-ads.json
+http://your-server:8000/mypodcast
 ```
 
-## Monitoring
+## Environment Variables
 
-Check logs with:
-```bash
-docker-compose logs -f
-```
-
-Logs show:
-- RSS feed refresh cycles (every 15 minutes)
-- Episode processing stages
-- Cache hits/misses
-- Processing times and statistics
-
-## Notes
-
-- First episode processing can take 5-10 minutes depending on length
-- Transcription requires significant CPU/memory
-- Failed episodes won't retry (serves original)
-- All data persists in `./data` directory
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ANTHROPIC_API_KEY` | required | Claude API key |
+| `BASE_URL` | `http://localhost:8000` | Public URL for generated feed links |
+| `WHISPER_MODEL` | `small` | Whisper model size (tiny/base/small/medium/large) |
+| `WHISPER_DEVICE` | `cuda` | Device for Whisper (cuda/cpu) |
