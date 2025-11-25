@@ -1,5 +1,7 @@
 data/
 .env
+config/feeds.json
+planning/
 __pycache__/
 *.pyc
 .DS_Store
