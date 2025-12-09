@@ -18,17 +18,6 @@ Processing happens on-demand when you play an episode. First play takes a few mi
 - Docker with NVIDIA GPU support (for Whisper)
 - Anthropic API key
 
-### CPU-Only Mode
-
-A [`cpu` branch](https://github.com/hemant6488/podcast-server/tree/cpu) is available that runs Whisper without an NVIDIA GPU.
-
-**Important:** CPU transcription is significantly slower—processing can take longer than the episode duration. Since episodes are processed on-demand when you play them, your podcast app will likely timeout waiting for the first request. To work around this:
-
-1. Tap download/play on an episode to trigger processing
-2. The request will timeout, but processing continues in the background
-3. Wait a few minutes (check `docker logs` for progress) for the file to get processed
-4. Try playing again, this time the processed file will be served from cache
-
 ## Setup
 
 ```bash
@@ -39,9 +28,21 @@ echo "ANTHROPIC_API_KEY=your-key-here" > .env
 cp config/feeds-example.json config/feeds.json
 # Edit config/feeds.json with your podcast RSS URLs
 
-# 3. Run
+# 3. Run (GPU)
 docker-compose up --build
+
+# Or for CPU-only mode (no NVIDIA GPU required)
+docker-compose -f docker-compose.cpu.yml up --build
 ```
+
+### CPU-Only Mode
+
+CPU transcription is significantly slower—processing can take longer than the episode duration. Since episodes are processed on-demand when you play them, your podcast app will likely timeout waiting for the first request. To work around this:
+
+1. Tap download/play on an episode to trigger processing
+2. The request will timeout, but processing continues in the background
+3. Wait a few minutes (check `docker logs` for progress) for the file to get processed
+4. Try playing again, the processed file will be served from cache
 
 ## Configuration
 

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  podcast-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro
+      - ./assets:/app/assets:ro
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - WHISPER_MODEL=small
+      - BASE_URL=${BASE_URL:-http://localhost:8000}
+      - WHISPER_DEVICE=cpu
+    restart: unless-stopped
