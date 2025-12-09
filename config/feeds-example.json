@@ -1,0 +1,6 @@
+[
+  {
+    "in": "https://example.com/podcast/feed.rss",
+    "out": "/mypodcast"
+  }
+]
